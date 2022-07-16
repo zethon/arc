@@ -1,8 +1,32 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(CppCursesTemplate)
+project(arc)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_MACOSX_RPATH 1)
+
+# initialize conan libs
+include(CMake/conan.cmake)
+conan_cmake_run(REQUIRES
+    boost/1.77.0
+    spdlog/1.9.2
+    fmt/8.1.1
+    libcurl/7.84.0
+    zlib/1.2.12
+    BASIC_SETUP CMAKE_TARGETS
+    GENERATORS cmake_find_package cmake_paths
+    BUILD missing
+    OPTIONS 
+        boost:shared=False 
+        boost:without_test=False 
+        boost:without_program_options=False 
+        boost:without_filesystem=False 
+        boost:without_system=False 
+        boost:without_exception=False
+        boost:without_contract=False
+)
+include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup(NO_OUTPUT_DIRS KEEP_RPATHS)
 
 if (MSVC)
     add_link_options(
@@ -42,5 +66,4 @@ else()
 
 endif()
 
-
-add_subdirectory(src)
+add_subdirectory(arc)

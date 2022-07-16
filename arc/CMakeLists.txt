@@ -1,3 +1,13 @@
+set(SOURCE_FILES
+    main.cpp
+
+    ArcApp.cpp
+)
+
+set(HEADER_FILES
+    ArcApp.h
+)
+
 if (WIN32)
     set(CURSES_LIBS ${CMAKE_SOURCE_DIR}/PDCurses/pdcurses.lib)
 else()
@@ -10,10 +20,9 @@ else()
     )
 endif()
 
-add_executable(main main.cpp)
+add_executable(arc ${SOURCE_FILES} ${HEADER_FILES})
 
-
-target_link_libraries(main
+target_link_libraries(arc
     PUBLIC
         ${CONAN_LIBS}
         ${CURSES_LIBS}
