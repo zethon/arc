@@ -1,39 +1,28 @@
+#include <form.h>
+
+#include "ArcUtils.h"
+#include "ColorPairs.h"
 #include "ArcApp.h"
 
 namespace arc
 {
 
-namespace
-{
-
-void rectangle(int y1, int x1, int y2, int x2)
-{
-    mvhline(y1, x1, 0, x2-x1);
-    mvhline(y2, x1, 0, x2-x1);
-    mvvline(y1, x1, 0, y2-y1);
-    mvvline(y1, x2, 0, y2-y1);
-    mvaddch(y1, x1, ACS_ULCORNER);
-    mvaddch(y2, x1, ACS_LLCORNER);
-    mvaddch(y1, x2, ACS_URCORNER);
-    mvaddch(y2, x2, ACS_LRCORNER);
-}
-
-} // namespace anonymous    
-
 App::App()
     : App(AppConfig{})
 {
-    // initscr();
-    cbreak();
-    // noecho();
-    // keypad(stdscr, true);
-    // curs_set(0);
-    // refresh();
 }
 
 App::App(const AppConfig& config)
 {
-    initscr();
+    _mainWindow = initscr();
+    noecho();
+    cbreak();
+    
+    keypad(stdscr, false);
+
+    start_color();
+    use_default_colors();
+    init_pair(CP_STATUS_BAR, COLOR_CYAN, -1);
 }
 
 App::~App()
@@ -46,18 +35,49 @@ void App::run()
     while (_running)
     {
         draw();
-        auto key = getch();
-        if (key == 'q')
+
+        const auto key = getch();
+        switch (key)
         {
-            _running = false;
+            default:
+            break;
+
+            case 'q':
+                _running = false;
+            break;
+
+            case '/':
+            {
+                const auto input = getUserCommand();
+                move(0,0);
+                printw(fmt::format("You typed: [{}]", input).c_str());
+            }
+            break;
         }
     }
 }
 
+std::string App::getUserCommand()
+{
+    attron(COLOR_PAIR(CP_STATUS_BAR));
+    attron(A_REVERSE | A_BOLD);
+
+    const std::string prompt = "> ";
+    const auto statusline = fmt::format("{:<{}}", prompt , COLS);
+    move(LINES-1, 0);
+    printw(statusline.data());
+    
+    move(LINES-1, prompt.size());
+    const auto result = arc::utils::getUserInput(stdscr);
+    attroff(COLOR_PAIR(CP_STATUS_BAR));
+    attron(A_REVERSE | A_BOLD);
+    
+    return result;
+}
+
 void App::draw()
 {
-    rectangle(0, 0, LINES-1, COLS-1);
-    printw("Hello World !!!");
+    _statusline.draw();
     refresh();
 }
 

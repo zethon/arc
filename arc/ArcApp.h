@@ -1,7 +1,10 @@
 #pragma once
 #include <atomic>
 
+#include <fmt/core.h>
 #include <curses.h>
+
+#include "StatusLine.h"
 
 namespace arc
 {
@@ -26,8 +29,13 @@ private:
     void draw_menubar();
     void draw_statusbar();
 
-    std::atomic_bool _running = true;
+    std::string getUserCommand();
 
+    std::atomic_bool    _running = true;
+    StatusLine          _statusline;
+    bool                _showCommandPrompt = false;
+
+    WINDOW* _mainWindow = nullptr;
 };
 
 } // namespace arc

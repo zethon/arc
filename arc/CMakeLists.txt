@@ -2,10 +2,13 @@ set(SOURCE_FILES
     main.cpp
 
     ArcApp.cpp
+    StatusLine.cpp
 )
 
 set(HEADER_FILES
     ArcApp.h
+    Arcutils.h
+    StatusLine.h
 )
 
 if (WIN32)
