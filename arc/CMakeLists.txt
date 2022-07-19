@@ -3,12 +3,14 @@ set(SOURCE_FILES
 
     ArcApp.cpp
     StatusLine.cpp
+    UrlBar.cpp
 )
 
 set(HEADER_FILES
     ArcApp.h
     Arcutils.h
     StatusLine.h
+    UrlBar.h
 )
 
 if (WIN32)
@@ -26,6 +28,15 @@ endif()
 add_executable(arc ${SOURCE_FILES} ${HEADER_FILES})
 
 target_link_libraries(arc
+    PUBLIC
+        ${CONAN_LIBS}
+        ${CURSES_LIBS}
+)
+
+
+add_executable(example example.cpp)
+
+target_link_libraries(example
     PUBLIC
         ${CONAN_LIBS}
         ${CURSES_LIBS}

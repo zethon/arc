@@ -1,3 +1,5 @@
+#include <fstream>
+
 #include <form.h>
 
 #include "ArcUtils.h"
@@ -6,6 +8,23 @@
 
 namespace arc
 {
+
+namespace
+{
+
+WINDOW *create_newwin(int height, int width, int starty, int startx)
+{
+    WINDOW *local_win;
+
+    local_win = newwin(height, width, starty, startx);
+
+    wrefresh(local_win);
+    refresh();
+
+    return local_win;
+}
+
+} // namespace anonymous
 
 App::App()
     : App(AppConfig{})
@@ -17,17 +36,38 @@ App::App(const AppConfig& config)
     _mainWindow = initscr();
     noecho();
     cbreak();
-    
     keypad(stdscr, false);
-
     start_color();
     use_default_colors();
-    init_pair(CP_STATUS_BAR, COLOR_CYAN, -1);
+
+    // application color pairs
+    init_pair(CP_STATUS_BAR, COLOR_BLUE, COLOR_WHITE);
+    init_pair(CP_URL_BAR, COLOR_BLUE, COLOR_WHITE);
+    init_pair(CP_BG, COLOR_BLACK, COLOR_GREEN);
+
+    _pageWindow = create_newwin(LINES-2, COLS, 1, 0);
+  
+    go("file://Users/addy/src/arc/arc/ColorPairs.h");
 }
 
 App::~App()
 {
     endwin();
+}
+
+void App::go(const std::string& url)
+{
+    _urlbar.setLocation(url);
+
+    std::ifstream myfile("/Users/addy/src/arc/arc/ArcApp.cpp");
+    std::string line;
+
+    while (std::getline(myfile, line))
+    {
+        waddstr(_pageWindow, line.c_str());
+    }
+
+    wrefresh(_pageWindow);
 }
 
 void App::run()
@@ -68,7 +108,7 @@ std::string App::getUserCommand()
     printw(statusline.data());
     
     move(LINES-1, prompt.size());
-    const auto result = arc::utils::getUserInput(stdscr);
+    const auto result = arc::utils::getUserInput(stdscr, 60);
     attroff(COLOR_PAIR(CP_STATUS_BAR));
     attron(A_REVERSE | A_BOLD);
     
@@ -77,6 +117,14 @@ std::string App::getUserCommand()
 
 void App::draw()
 {
+    wmove(stdscr, 20, 20);
+    waddstr(stdscr, "Hello World!");
+    
+    wbkgd(_pageWindow, COLOR_PAIR(CP_BG));
+    wmove(_pageWindow, 0, 0);
+    wprintw(_pageWindow, "Hello World1!");
+
+    _urlbar.draw();
     _statusline.draw();
     refresh();
 }

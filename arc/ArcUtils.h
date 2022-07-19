@@ -5,7 +5,7 @@
 namespace arc::utils
 {
 
-inline std::string getUserInput(WINDOW* win = stdscr)
+inline std::string getUserInput(WINDOW* win, std::size_t maxlen = 0, char echo = '\0')
 {
     std::string retval;
     int x = 0, y=0;
@@ -33,9 +33,10 @@ inline std::string getUserInput(WINDOW* win = stdscr)
             retval.clear();
             break;
         }
-        else
+        else if (maxlen == 0 || retval.size() < maxlen)
         {
             retval += ch;
+            if (echo != '\0') ch = echo;
             mvaddch(y, x, ch);
         }
     }
@@ -53,6 +54,24 @@ inline void rectangle(int y1, int x1, int y2, int x2)
     mvaddch(y2, x1, ACS_LLCORNER);
     mvaddch(y1, x2, ACS_URCORNER);
     mvaddch(y2, x2, ACS_LRCORNER);
+}
+
+static void fill_window(WINDOW *win, chtype ch)
+{
+    int y, x;
+    int y0, x0;
+    int y1, x1;
+
+    getyx(win, y0, x0);
+    getmaxyx(win, y1, x1);
+    for (y = 0; y < y1; ++y) {
+	for (x = 0; x < x1; ++x) {
+	    mvwaddch(win, y, x, ch);
+	}
+    }
+    wsyncdown(win);
+    wmove(win, y0, x0);
+    wrefresh(win);
 }
 
 } // namespace arc::utils

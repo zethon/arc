@@ -53,12 +53,5 @@ int main(int argc, char *argv[])
     arc::App app;
     app.run();
 
-    // initscr();
-    // rectangle(0, 0, LINES-1, COLS-1);
-    // printw("Hello World !!!");
-    // refresh();
-    // getch();
-    // endwin();
-
     return 0;
 }

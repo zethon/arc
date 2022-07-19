@@ -5,6 +5,7 @@
 #include <curses.h>
 
 #include "StatusLine.h"
+#include "UrlBar.h"
 
 namespace arc
 {
@@ -23,6 +24,7 @@ public:
     ~App();
 
     void run();
+    void go(const std::string& url);
 
 private:
     void draw();
@@ -32,10 +34,13 @@ private:
     std::string getUserCommand();
 
     std::atomic_bool    _running = true;
-    StatusLine          _statusline;
     bool                _showCommandPrompt = false;
 
     WINDOW* _mainWindow = nullptr;
+    WINDOW* _pageWindow = nullptr;
+
+    StatusLine          _statusline;
+    UrlBar              _urlbar;
 };
 
 } // namespace arc
