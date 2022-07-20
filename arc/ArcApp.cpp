@@ -1,6 +1,5 @@
 #include <fstream>
-
-#include <form.h>
+#include <functional>
 
 #include "ArcUtils.h"
 #include "ColorPairs.h"
@@ -59,7 +58,7 @@ void App::go(const std::string& url)
 {
     _urlbar.setLocation(url);
 
-    std::ifstream myfile("/Users/addy/src/arc/arc/ArcApp.cpp");
+    std::ifstream myfile(R"(C:\Users\adalid.claure\src\arc\arc\ArcApp.cpp)");
     std::string line;
 
     while (std::getline(myfile, line))
@@ -107,7 +106,7 @@ std::string App::getUserCommand()
     move(LINES-1, 0);
     printw(statusline.data());
     
-    move(LINES-1, prompt.size());
+    move(LINES-1, static_cast<int>(prompt.size()));
     const auto result = arc::utils::getUserInput(stdscr, 60);
     attroff(COLOR_PAIR(CP_STATUS_BAR));
     attron(A_REVERSE | A_BOLD);

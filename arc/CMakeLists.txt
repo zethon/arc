@@ -32,12 +32,3 @@ target_link_libraries(arc
         ${CONAN_LIBS}
         ${CURSES_LIBS}
 )
-
-
-add_executable(example example.cpp)
-
-target_link_libraries(example
-    PUBLIC
-        ${CONAN_LIBS}
-        ${CURSES_LIBS}
-)

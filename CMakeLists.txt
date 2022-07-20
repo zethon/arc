@@ -30,6 +30,7 @@ conan_basic_setup(NO_OUTPUT_DIRS KEEP_RPATHS)
 
 if (MSVC)
     add_link_options(
+        /IGNORE:4099
         /NODEFAULTLIB:library 
     )
 endif(MSVC)
