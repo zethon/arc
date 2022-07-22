@@ -2,13 +2,17 @@ set(SOURCE_FILES
     main.cpp
 
     ArcApp.cpp
+    ArcUtils.cpp
+    Canvas.cpp
     StatusLine.cpp
     UrlBar.cpp
 )
 
 set(HEADER_FILES
     ArcApp.h
-    Arcutils.h
+    ArcUtils.h
+    Canvas.h
+    NCursesUtils.h
     StatusLine.h
     UrlBar.h
 )
@@ -27,8 +31,26 @@ endif()
 
 add_executable(arc ${SOURCE_FILES} ${HEADER_FILES})
 
+if(APPLE)
+    # utils.h/.cpp needs these two libraries if curl
+    # is not included
+    find_library(COREFOUNDATION_LIBRARY CoreFoundation)
+    find_library(CARBON_LIBRARY Carbon)
+endif()
+
 target_link_libraries(arc
     PUBLIC
         ${CONAN_LIBS}
         ${CURSES_LIBS}
+        ${COREFOUNDATION_LIBRARY}
+        ${CARBON_LIBRARY}
+)
+
+add_executable(example example.cpp)
+target_link_libraries(example
+    PUBLIC
+        ${CONAN_LIBS}
+        ${CURSES_LIBS}
+        ${COREFOUNDATION_LIBRARY}
+        ${CARBON_LIBRARY}
 )

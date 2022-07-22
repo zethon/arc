@@ -6,6 +6,7 @@
 
 #include "StatusLine.h"
 #include "UrlBar.h"
+#include "Canvas.h"
 
 namespace arc
 {
@@ -13,6 +14,13 @@ namespace arc
 struct AppConfig
 {
 
+};
+
+struct Action
+{
+    std::string name;
+    std::string description;
+    std::function<void(const std::string&)> action;
 };
 
 class App
@@ -25,22 +33,28 @@ public:
 
     void run();
     void go(const std::string& url);
+    void show(const std::string& filename);
 
 private:
     void draw();
     void draw_menubar();
     void draw_statusbar();
+    void init_commands();
+    void execute_command(const std::string& command);
 
     std::string getUserCommand();
 
-    std::atomic_bool    _running = true;
-    bool                _showCommandPrompt = false;
+    std::atomic_bool        _running = true;
+    bool                    _showCommandPrompt = false;
+    std::vector<Action>     _actions;
 
     WINDOW* _mainWindow = nullptr;
     WINDOW* _pageWindow = nullptr;
+    std::unique_ptr<Canvas> _canvas;
 
     StatusLine          _statusline;
     UrlBar              _urlbar;
+    
 };
 
 } // namespace arc

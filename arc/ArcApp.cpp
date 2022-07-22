@@ -1,9 +1,15 @@
 #include <fstream>
 #include <functional>
 
-#include "ArcUtils.h"
+#include <boost/algorithm/string.hpp>
+#include <filesystem>
+
+#include "NCursesUtils.h"
 #include "ColorPairs.h"
+#include "ArcUtils.h"
 #include "ArcApp.h"
+
+using namespace std::literals::string_literals;
 
 namespace arc
 {
@@ -39,14 +45,66 @@ App::App(const AppConfig& config)
     start_color();
     use_default_colors();
 
+    // hide the cursor
+    curs_set(0);
+
     // application color pairs
     init_pair(CP_STATUS_BAR, COLOR_BLUE, COLOR_WHITE);
     init_pair(CP_URL_BAR, COLOR_BLUE, COLOR_WHITE);
     init_pair(CP_BG, COLOR_BLACK, COLOR_GREEN);
 
-    _pageWindow = create_newwin(LINES-2, COLS, 1, 0);
-  
-    go("file://Users/addy/src/arc/arc/ColorPairs.h");
+    init_commands();
+
+    // _pageWindow = create_newwin(LINES-2, COLS, 1, 0);
+    // scrollok(_pageWindow,true);
+
+    _canvas = std::make_unique<Canvas>(LINES-2, COLS, 1, 0);
+    _canvas->draw();
+    // show("/Users/addy/src/arc/arc/ArcApp.cpp");
+}
+
+void App::init_commands()
+{
+    _actions.push_back({"quit"s, 
+        "Quit the application"s, 
+        [&](const std::string&) { _running = false; }});
+
+    _actions.push_back({"go"s, 
+        "Go"s, 
+        [&](const std::string& url) { this->go(url); }});
+
+    _actions.push_back({"show"s, 
+        "Show"s, 
+        [&](const std::string& filename)
+        { 
+            this->show(filename);
+        }});
+
+    _actions.push_back({"t"s, 
+        "t"s, 
+        [&](const std::string& url) { show("/Users/addy/src/arc/arc/ArcApp.cpp"); }});
+
+}
+
+void App::execute_command(const std::string& original)
+{
+    std::string command { original };
+    boost::trim(command);
+    if (command.empty()) return;
+
+    std::vector<std::string> params;
+    boost::split(params, command, boost::is_any_of(" "));
+    if (params.empty()) return;
+
+    auto actionIt = std::find_if(_actions.begin(), _actions.end(), 
+        [&](const Action& action) { return action.name == params[0]; });
+
+    if (actionIt != _actions.end())
+    {
+        params.erase(params.begin()); // remove the command name
+        std::string paramstr = boost::join(params, " ");
+        actionIt->action(paramstr);
+    }
 }
 
 App::~App()
@@ -57,16 +115,69 @@ App::~App()
 void App::go(const std::string& url)
 {
     _urlbar.setLocation(url);
+    ::utils::openBrowser(url);
+    // wrefresh(_pageWindow);
+}
 
-    std::ifstream myfile(R"(C:\Users\adalid.claure\src\arc\arc\ArcApp.cpp)");
-    std::string line;
-
-    while (std::getline(myfile, line))
+void App::show(const std::string& filename)
+{
+    if (!std::filesystem::exists(filename))
     {
-        waddstr(_pageWindow, line.c_str());
+        const auto msg = fmt::format("File not found: {}", filename);
+        utils::message_box(msg);
+        return;
     }
 
-    wrefresh(_pageWindow);
+    if (!std::filesystem::is_regular_file(filename))
+    {
+        const auto msg = fmt::format("{} cannot be displayed", filename);
+        utils::message_box(msg);
+        return;
+    }
+
+    const auto filesize = std::filesystem::file_size(filename);
+    if (filesize > 1024 * 1024 * 10)
+    {
+        const auto msg = fmt::format("{} is too large to display", filename);
+        utils::message_box(msg);
+        return;
+    }
+
+    // char *	pageBuffer;
+    // pageBuffer = new char[filesize];
+
+    std::ifstream in(filename.data());
+    // std::string contents((std::istreambuf_iterator<char>(in)), 
+    //     std::istreambuf_iterator<char>());
+
+    _canvas->set_buffer(in);
+
+    // delete [] pageBuffer;
+    // pageBuffer = nullptr;
+
+    //     std::ifstream ifs(filename);
+    //     std::stringstream ss;
+    //     ss << ifs.rdbuf();
+    //     _canvas->setContent(ss.str());
+    //     wrefresh(_pageWindow);
+    // }
+
+    // std::ifstream myfile(filename);
+    // if (!myfile.is_open()) return;
+
+
+
+    // _urlbar.setLocation(filename);
+
+    // int x = 0, y = 0;
+
+    // std::string line;
+    // while (std::getline(myfile, line))
+    // {
+    //     mvwprintw(_pageWindow, y, x, line.c_str());
+    //     y++;
+    // }
+    // wrefresh(_pageWindow);
 }
 
 void App::run()
@@ -85,11 +196,20 @@ void App::run()
                 _running = false;
             break;
 
+            case '[':
+                wscrl(_pageWindow, -1);
+                wrefresh(_pageWindow);
+            break;
+
+            case ']':
+                wscrl(_pageWindow, 1);
+                wrefresh(_pageWindow);
+            break;
+
             case '/':
             {
                 const auto input = getUserCommand();
-                move(0,0);
-                printw(fmt::format("You typed: [{}]", input).c_str());
+                execute_command(input);
             }
             break;
         }
@@ -116,16 +236,24 @@ std::string App::getUserCommand()
 
 void App::draw()
 {
-    wmove(stdscr, 20, 20);
-    waddstr(stdscr, "Hello World!");
+    // wmove(stdscr, 20, 20);
+    // waddstr(stdscr, "THIS IS THE BLACK");
+    // refresh();
     
-    wbkgd(_pageWindow, COLOR_PAIR(CP_BG));
-    wmove(_pageWindow, 0, 0);
-    wprintw(_pageWindow, "Hello World1!");
+    // wbkgd(_pageWindow, COLOR_PAIR(CP_BG));
+    // wmove(_pageWindow, 0, 0);
+    // wprintw(_pageWindow, "THIS IS THE GREEN");
+    // wrefresh(_pageWindow);
 
     _urlbar.draw();
     _statusline.draw();
     refresh();
+
+    _canvas->draw();
+    
+    // _statusline.draw();
+    // refresh();
+
 }
 
 void App::draw_menubar()

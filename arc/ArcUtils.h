@@ -1,77 +1,32 @@
+// Arc
+// Copyright (c) 2022-2022, Adalid Claure <aclaure@gmail.com>
+
 #pragma once
-#include <curses.h>
+
 #include <string>
+#include <vector>
+#include <map>
 
-namespace arc::utils
+namespace utils
 {
 
-inline std::string getUserInput(WINDOW* win, std::size_t maxlen = 0, char echo = '\0')
+class NotImplementedException : public std::logic_error
 {
-    std::string retval;
-    int x = 0, y=0;
 
-    while (true)
-    {
-        getyx(win, y, x);
+public:
+    NotImplementedException(const std::string& funcname);
+};
 
-        int ch = getch();
-        if (ch == '\n' || ch == -1)
-        {
-            break;
-        }
-        else if (ch == '\b' || ch == 127 || ch == KEY_BACKSPACE)
-        {
-            if (!retval.empty())
-            {
-                mvaddch(y, x-1, ' ');
-                move(y, x-1);
-                retval.pop_back();
-            }
-        }
-        else if (ch == 27)
-        {
-            retval.clear();
-            break;
-        }
-        else if (maxlen == 0 || retval.size() < maxlen)
-        {
-            retval += ch;
-            if (echo != '\0') ch = echo;
-            mvaddch(y, x, ch);
-        }
-    }
+std::string getOsString();
 
-    return retval;
-}
+void openBrowser(const std::string& url_str);
 
-inline void rectangle(int y1, int x1, int y2, int x2)
-{
-    mvhline(y1, x1, 0, x2-x1);
-    mvhline(y2, x1, 0, x2-x1);
-    mvvline(y1, x1, 0, y2-y1);
-    mvvline(y1, x2, 0, y2-y1);
-    mvaddch(y1, x1, ACS_ULCORNER);
-    mvaddch(y2, x1, ACS_LLCORNER);
-    mvaddch(y1, x2, ACS_URCORNER);
-    mvaddch(y2, x2, ACS_LRCORNER);
-}
+bool isNumeric(const std::string_view& s);
+bool isBoolean(const std::string_view s);
+bool convertToBool(const std::string_view s);
 
-static void fill_window(WINDOW *win, chtype ch)
-{
-    int y, x;
-    int y0, x0;
-    int y1, x1;
+std::string getUserFolder();
+std::string getDataFolder();
+std::string getDefaultConfigFile();
 
-    getyx(win, y0, x0);
-    getmaxyx(win, y1, x1);
-    for (y = 0; y < y1; ++y) {
-	for (x = 0; x < x1; ++x) {
-	    mvwaddch(win, y, x, ch);
-	}
-    }
-    wsyncdown(win);
-    wmove(win, y0, x0);
-    wrefresh(win);
-}
-
-} // namespace arc::utils
+} // namespace
