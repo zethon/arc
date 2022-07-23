@@ -55,12 +55,8 @@ App::App(const AppConfig& config)
 
     init_commands();
 
-    // _pageWindow = create_newwin(LINES-2, COLS, 1, 0);
-    // scrollok(_pageWindow,true);
-
     _canvas = std::make_unique<Canvas>(LINES-2, COLS, 1, 0);
-    _canvas->draw();
-    // show("/Users/addy/src/arc/arc/ArcApp.cpp");
+    show("/Users/addy/src/arc/arc/ArcApp.cpp");
 }
 
 void App::init_commands()
@@ -143,41 +139,9 @@ void App::show(const std::string& filename)
         return;
     }
 
-    // char *	pageBuffer;
-    // pageBuffer = new char[filesize];
-
+    _urlbar.setLocation(filename);
     std::ifstream in(filename.data());
-    // std::string contents((std::istreambuf_iterator<char>(in)), 
-    //     std::istreambuf_iterator<char>());
-
     _canvas->set_buffer(in);
-
-    // delete [] pageBuffer;
-    // pageBuffer = nullptr;
-
-    //     std::ifstream ifs(filename);
-    //     std::stringstream ss;
-    //     ss << ifs.rdbuf();
-    //     _canvas->setContent(ss.str());
-    //     wrefresh(_pageWindow);
-    // }
-
-    // std::ifstream myfile(filename);
-    // if (!myfile.is_open()) return;
-
-
-
-    // _urlbar.setLocation(filename);
-
-    // int x = 0, y = 0;
-
-    // std::string line;
-    // while (std::getline(myfile, line))
-    // {
-    //     mvwprintw(_pageWindow, y, x, line.c_str());
-    //     y++;
-    // }
-    // wrefresh(_pageWindow);
 }
 
 void App::run()
@@ -236,29 +200,17 @@ std::string App::getUserCommand()
 
 void App::draw()
 {
-    // wmove(stdscr, 20, 20);
-    // waddstr(stdscr, "THIS IS THE BLACK");
-    // refresh();
-    
-    // wbkgd(_pageWindow, COLOR_PAIR(CP_BG));
-    // wmove(_pageWindow, 0, 0);
-    // wprintw(_pageWindow, "THIS IS THE GREEN");
-    // wrefresh(_pageWindow);
-
+    // we must refresh the top and bottom parts of the screen
+    // before we draw the page
     _urlbar.draw();
     _statusline.draw();
     refresh();
-
-    _canvas->draw();
     
-    // _statusline.draw();
-    // refresh();
-
+    _canvas->draw();
 }
 
 void App::draw_menubar()
 {
-
 }
 
 void App::draw_statusbar()

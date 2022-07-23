@@ -58,27 +58,29 @@ void Canvas::set_buffer(char* buffer, std::size_t len)
 
 void Canvas::set_buffer(std::istream& stream)
 {
-    // delete_pad();
+    delete_pad();
 
-    _pad = newpad(LINES+1, COLS);
-    wprintw(_pad, "Hello, World!\n");
-    prefresh(_pad, 0, 0, 0, 0, LINES-1, COLS);
+    // _pad = newpad(LINES+10, COLS);
+    // wprintw(_pad, "Hello, World!\n");
+
+    _pad = newpad(LINES+10, COLS);
+    // wprintw(_pad, "Hello, World!\n");
+    // prefresh(_pad, 0, 0, 0, 0, LINES-1, COLS);
 
     // std::istream in(&membuf);
-    // std::string line;
-    // while (std::getline(in, line))
-    // {
-    //     wprintw(_pad, "%s\n", line.data()); 
-    // }
+    std::string line;
+    while (std::getline(stream, line))
+    {
+        wprintw(_pad, "%s\n", line.data()); 
+    }
 
     // prefresh(_pad, 0, 0, 0, 0, LINES-1, COLS);
 }
 
 void Canvas::draw()
 {
-    WINDOW *pad = newpad(LINES+10, COLS);
-    wprintw(pad, "Hello, World!\n");
-    prefresh(pad, 0, 0, 1, 0, LINES-2, COLS);
+
+    prefresh(_pad, 0, 0, 1, 0, LINES-2, COLS);
     // wgetch(pad);
 }
 
