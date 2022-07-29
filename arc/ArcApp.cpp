@@ -1,8 +1,13 @@
 #include <fstream>
 #include <functional>
+#include <filesystem>
 
 #include <boost/algorithm/string.hpp>
-#include <filesystem>
+// #include <boost/url/src.hpp>
+
+#include <md4c.h>
+
+#include "home_md.h"
 
 #include "NCursesUtils.h"
 #include "ColorPairs.h"
@@ -55,8 +60,20 @@ App::App(const AppConfig& config)
 
     init_commands();
 
-    _canvas = std::make_unique<Canvas>(LINES-2, COLS, 1, 0);
-    show("/Users/addy/src/arc/arc/ArcApp.cpp");
+    // go("arc://home"s);
+    // _canvas->setRenderer(textRenderer);
+    // _canvas->draw()
+
+    // _canvas = std::make_unique<Canvas>(LINES-2, COLS, 1, 0);
+    // _canvas->set_buffer(const_cast<char*>(&home_md[0]), strlen(home_md));
+
+    // MD_PARSER mdparser;
+    // mdparser.flags = 1;
+
+    // std::string_view test = "# Hi there!";
+
+    // auto x = md_parse(test.data(), test.size(), &mdparser, nullptr);
+    // std::cout << "x: " << x << std::endl;
 }
 
 void App::init_commands()
@@ -75,11 +92,6 @@ void App::init_commands()
         { 
             this->show(filename);
         }});
-
-    _actions.push_back({"t"s, 
-        "t"s, 
-        [&](const std::string& url) { show("/Users/addy/src/arc/arc/ArcApp.cpp"); }});
-
 }
 
 void App::execute_command(const std::string& original)
@@ -112,7 +124,6 @@ void App::go(const std::string& url)
 {
     _urlbar.setLocation(url);
     ::utils::openBrowser(url);
-    // wrefresh(_pageWindow);
 }
 
 void App::show(const std::string& filename)

@@ -17,9 +17,10 @@ struct MemoryBuffer : std::streambuf
     }
 };
 
-std::size_t line_count(std::streambuf& buffer)
+std::size_t line_count(char* input, std::size_t len)
 {
-    std::istream in(&buffer);
+    MemoryBuffer membuf(input, len);
+    std::istream in(&membuf);
 
     std::size_t count = 0;
     std::string line;
@@ -37,44 +38,35 @@ Canvas::Canvas(int y, int x, int height, int width)
     
 }
 
+void Canvas::set_buffer(std::string_view str)
+{
+    set_buffer(const_cast<char*>(str.data()), str.size());
+}
+
 void Canvas::set_buffer(char* buffer, std::size_t len)
 {
-    MemoryBuffer membuf(buffer, len);
-    int lcount = line_count(membuf);
+    int lcount = line_count(buffer, len);
 
     delete_pad();
-    _pad = newpad (LINES+1, COLS);
-    wprintw(_pad, "Hello, World!\n");
+    _pad = newpad(LINES+10, COLS);
+    
+    MemoryBuffer membuf(buffer, len);
+    std::istream in(&membuf);
 
-    // std::istream in(&membuf);
-    // std::string line;
-    // while (std::getline(in, line))
-    // {
-    //     wprintw(_pad, "%s\n", line.data()); 
-    // }
-
-    prefresh(_pad, 0, 0, 0, 0, LINES-1, COLS);
+    set_buffer(in);
 }
 
 void Canvas::set_buffer(std::istream& stream)
 {
     delete_pad();
 
-    // _pad = newpad(LINES+10, COLS);
-    // wprintw(_pad, "Hello, World!\n");
-
     _pad = newpad(LINES+10, COLS);
-    // wprintw(_pad, "Hello, World!\n");
-    // prefresh(_pad, 0, 0, 0, 0, LINES-1, COLS);
 
-    // std::istream in(&membuf);
     std::string line;
     while (std::getline(stream, line))
     {
         wprintw(_pad, "%s\n", line.data()); 
     }
-
-    // prefresh(_pad, 0, 0, 0, 0, LINES-1, COLS);
 }
 
 void Canvas::draw()
@@ -91,6 +83,11 @@ void Canvas::delete_pad()
         delwin(_pad);
         _pad = nullptr;
     }
+}
+
+void Canvas::send_message(std::uint32_t message, const std::any& data)
+{
+
 }
 
 } // namespace arc

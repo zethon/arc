@@ -9,14 +9,6 @@
 
 namespace po = boost::program_options;
 
-// void welcome()
-// {
-//     mvprintw(0, 0, "Welcome to the Arc game!");
-//     mvprintw(1, 0, "Press any key to start.");
-//     refresh();
-//     getch();
-// }
-
 int main(int argc, char *argv[])
 {
     po::options_description desc("Allowed options");

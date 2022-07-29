@@ -6,6 +6,8 @@ set(SOURCE_FILES
     Canvas.cpp
     StatusLine.cpp
     UrlBar.cpp
+
+    ${CMAKE_SOURCE_DIR}/md4c/src/md4c.c
 )
 
 set(HEADER_FILES
@@ -15,6 +17,8 @@ set(HEADER_FILES
     NCursesUtils.h
     StatusLine.h
     UrlBar.h
+
+    ${CMAKE_SOURCE_DIR}/md4c/src/md4c.h
 )
 
 if (WIN32)
@@ -53,4 +57,8 @@ target_link_libraries(example
         ${CURSES_LIBS}
         ${COREFOUNDATION_LIBRARY}
         ${CARBON_LIBRARY}
+)
+
+z_compile_resources(RESOURCE_FILES
+    pages/home.md
 )

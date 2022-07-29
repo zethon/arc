@@ -21,6 +21,9 @@
 #   include <unistd.h>
 #   include <sys/types.h>
 #   include <pwd.h>
+#endif
+
+#ifdef __linux__
 #   include <boost/process.hpp>
 #endif
 
