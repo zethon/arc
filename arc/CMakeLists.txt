@@ -61,4 +61,5 @@ target_link_libraries(example
 
 z_compile_resources(RESOURCE_FILES
     pages/home.md
+    pages/about.md
 )

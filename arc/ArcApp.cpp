@@ -3,11 +3,13 @@
 #include <filesystem>
 
 #include <boost/algorithm/string.hpp>
-// #include <boost/url/src.hpp>
+#include <boost/url/src.hpp>
 
 #include <md4c.h>
 
 #include "home_md.h"
+#include "about_md.h"
+#include "help_md.h"
 
 #include "NCursesUtils.h"
 #include "ColorPairs.h"
@@ -15,9 +17,17 @@
 #include "ArcApp.h"
 
 using namespace std::literals::string_literals;
+using namespace std::literals::string_view_literals;
 
 namespace arc
 {
+
+const static std::map<std::string_view, const char*> STATIC_PAGES_MAP =
+{
+    { "home", &(home_md[0]) },
+    { "about"sv, &(about_md[0]) },
+    { "help"sv, &(help_md[0]) },
+};
 
 namespace
 {
@@ -60,11 +70,11 @@ App::App(const AppConfig& config)
 
     init_commands();
 
-    // go("arc://home"s);
+    
     // _canvas->setRenderer(textRenderer);
     // _canvas->draw()
 
-    // _canvas = std::make_unique<Canvas>(LINES-2, COLS, 1, 0);
+    _canvas = std::make_unique<Canvas>(LINES-2, COLS, 1, 0);
     // _canvas->set_buffer(const_cast<char*>(&home_md[0]), strlen(home_md));
 
     // MD_PARSER mdparser;
@@ -74,6 +84,8 @@ App::App(const AppConfig& config)
 
     // auto x = md_parse(test.data(), test.size(), &mdparser, nullptr);
     // std::cout << "x: " << x << std::endl;
+
+    go("arc://home"s);
 }
 
 void App::init_commands()
@@ -122,6 +134,26 @@ App::~App()
 
 void App::go(const std::string& url)
 {
+    namespace bu = boost::urls;
+    bu::string_view urlsv{url};
+    const auto result = bu::parse_uri(urlsv);
+
+    std::string pageName { url };
+    if (result.has_value() && result->scheme() == "arc"s)
+    {
+        pageName = result->host().to_string();
+    }
+
+    auto content = STATIC_PAGES_MAP.find(pageName);
+    if (content == STATIC_PAGES_MAP.end())
+    {
+        utils::message_box("Invalid Page");
+        return;
+    }
+
+    _canvas->set_buffer(const_cast<char*>(content->second), 
+        strlen(content->second));
+
     _urlbar.setLocation(url);
     ::utils::openBrowser(url);
 }

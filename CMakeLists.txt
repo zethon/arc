@@ -73,5 +73,6 @@ else()
 endif()
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/md4c/src)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/url/include)
 
 add_subdirectory(arc)
