@@ -15,6 +15,7 @@ set(HEADER_FILES
     ArcUtils.h
     Canvas.h
     NCursesUtils.h
+    Renderer.h
     StatusLine.h
     UrlBar.h
 
@@ -62,4 +63,5 @@ target_link_libraries(example
 z_compile_resources(RESOURCE_FILES
     pages/home.md
     pages/about.md
+    pages/help.md
 )

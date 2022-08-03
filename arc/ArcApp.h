@@ -7,9 +7,19 @@
 #include "StatusLine.h"
 #include "UrlBar.h"
 #include "Canvas.h"
+#include "Renderer.h"
 
 namespace arc
 {
+
+enum class RenderType
+{
+    Text,
+    Markdown,
+    HTML
+};
+
+using RenderMap = std::map<RenderType, RendererPtr>;
 
 struct AppConfig
 {
@@ -37,8 +47,6 @@ public:
 
 private:
     void draw();
-    void draw_menubar();
-    void draw_statusbar();
     void init_commands();
     void execute_command(const std::string& command);
 
@@ -50,7 +58,9 @@ private:
 
     WINDOW* _mainWindow = nullptr;
     WINDOW* _pageWindow = nullptr;
+
     std::unique_ptr<Canvas> _canvas;
+    // RenderMap               _renders;
 
     StatusLine          _statusline;
     UrlBar              _urlbar;

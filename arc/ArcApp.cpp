@@ -1,6 +1,7 @@
 #include <fstream>
 #include <functional>
 #include <filesystem>
+#include <regex>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/url/src.hpp>
@@ -15,6 +16,7 @@
 #include "ColorPairs.h"
 #include "ArcUtils.h"
 #include "ArcApp.h"
+#include "Renderer.h"
 
 using namespace std::literals::string_literals;
 using namespace std::literals::string_view_literals;
@@ -53,6 +55,8 @@ App::App()
 
 App::App(const AppConfig& config)
 {
+    // _renders.emplace(RenderType::Text, std::make_unique<TextRenderer>());
+
     _mainWindow = initscr();
     noecho();
     cbreak();
@@ -125,6 +129,10 @@ void App::execute_command(const std::string& original)
         std::string paramstr = boost::join(params, " ");
         actionIt->action(paramstr);
     }
+    else
+    { 
+        go(original);
+    }
 }
 
 App::~App()
@@ -135,27 +143,63 @@ App::~App()
 void App::go(const std::string& url)
 {
     namespace bu = boost::urls;
+
+    const static std::regex domain_regex("^(?!-)[A-Za-z0-9-]+([\\-\\.]{1}[a-z0-9]+)*\\.[A-Za-z]{2,6}$");
+
     bu::string_view urlsv{url};
     const auto result = bu::parse_uri(urlsv);
 
-    std::string pageName { url };
-    if (result.has_value() && result->scheme() == "arc"s)
+    if (result.has_value())
     {
-        pageName = result->host().to_string();
-    }
+        const auto& uri = result.value();
+        if (uri.scheme() == "arc")
+        {
+            auto it = STATIC_PAGES_MAP.find(uri.host().to_string());
+            if (it != STATIC_PAGES_MAP.end())
+            {
+                _canvas->set_buffer(const_cast<char*>(it->second), strlen(it->second));
+            }
+        }
+        else if (uri.scheme() == "file")
+        {
+            // std::filesystem::path path(uri.encoded_path().to_string());
+            // if (std::filesystem::exists(path))
+            // {
+            //     std::ifstream ifs(path);
+            //     std::string content((std::istreambuf_iterator<char>(ifs)),
+            //                         (std::istreambuf_iterator<char>()));
 
-    auto content = STATIC_PAGES_MAP.find(pageName);
-    if (content == STATIC_PAGES_MAP.end())
+            //     _canvas->set_buffer(const_cast<char*>(content.c_str()), content.size());
+            // }
+            // else
+            // {
+            //     arc::utils::message_box(fmt::format("file '{}' not found", path.string()));
+            // }
+        }
+
+        _urlbar.setLocation(url);
+    }
+    else if (auto it = STATIC_PAGES_MAP.find(url); it != STATIC_PAGES_MAP.end())
     {
-        utils::message_box("Invalid Page");
-        return;
+        // this was not a valid URL, so first we look for an internal page
+        // by the name of what was typed, and then if that doesn't exist
+        // we see if this looks like a domain name, and if so try to load that
+        // otherwise popup an error
+        _canvas->set_buffer(const_cast<char*>(it->second), strlen(it->second));
+        bu::url dest;
+        dest.set_host(url);
+        dest.set_scheme("arc");
+        _urlbar.setLocation(std::string{dest.string()});
     }
+    else if(std::regex_match(url, domain_regex))
+    {
+        bu::url dest;
+        dest.set_host(url);
+        dest.set_scheme("https");
+        _urlbar.setLocation(std::string{dest.string()});
 
-    _canvas->set_buffer(const_cast<char*>(content->second), 
-        strlen(content->second));
-
-    _urlbar.setLocation(url);
-    ::utils::openBrowser(url);
+        ::utils::openBrowser(std::string{dest.string()});
+    }
 }
 
 void App::show(const std::string& filename)
@@ -250,15 +294,6 @@ void App::draw()
     refresh();
     
     _canvas->draw();
-}
-
-void App::draw_menubar()
-{
-}
-
-void App::draw_statusbar()
-{
-
 }
 
 } // namespace arc
