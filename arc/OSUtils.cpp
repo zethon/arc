@@ -38,7 +38,7 @@
 
 #include <fmt/core.h>
 
-#include "ArcUtils.h"
+#include "OSUtils.h"
 
 // There's some weirdness going on in Ubuntu where using the / operator
 // on Ubuntu was throwing an error in some instances. Instead I set out
@@ -50,7 +50,7 @@
 #   define PATH_SEPERATOR   '/'
 #endif
 
-namespace utils
+namespace os::utils
 {
 
 NotImplementedException::NotImplementedException(const std::string& funcname)
@@ -218,6 +218,5 @@ std::string getDefaultDatabaseFolder()
     return fmt::format("{}{}{}",
         utils::getDataFolder(), PATH_SEPERATOR, "Arc");
 }
-
 
 } // namespace

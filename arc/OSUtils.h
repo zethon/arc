@@ -7,7 +7,7 @@
 #include <vector>
 #include <map>
 
-namespace utils
+namespace os::utils
 {
 
 class NotImplementedException : public std::logic_error

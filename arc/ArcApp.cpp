@@ -14,7 +14,7 @@
 
 #include "NCursesUtils.h"
 #include "ColorPairs.h"
-#include "ArcUtils.h"
+#include "OSUtils.h"
 #include "ArcApp.h"
 #include "Renderer.h"
 
@@ -198,7 +198,7 @@ void App::go(const std::string& url)
         dest.set_scheme("https");
         _urlbar.setLocation(std::string{dest.string()});
 
-        ::utils::openBrowser(std::string{dest.string()});
+        os::utils::openBrowser(std::string{dest.string()});
     }
 }
 

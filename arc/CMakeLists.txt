@@ -2,8 +2,9 @@ set(SOURCE_FILES
     main.cpp
 
     ArcApp.cpp
-    ArcUtils.cpp
+    ArcLogger.cpp
     Canvas.cpp
+    OSUtils.cpp
     StatusLine.cpp
     UrlBar.cpp
 
@@ -12,9 +13,10 @@ set(SOURCE_FILES
 
 set(HEADER_FILES
     ArcApp.h
-    ArcUtils.h
+    ArcLogger.h
     Canvas.h
     NCursesUtils.h
+    OSUtils.h
     Renderer.h
     StatusLine.h
     UrlBar.h
